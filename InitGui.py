@@ -5,7 +5,7 @@ class ehtecOptics (Workbench):
     MenuText = "ehtec Optics"
     ToolTip = "A description of my workbench"
     #Icon = """/home/pi/.FreeCAD/Mod/ehtecoptics/resources/ehtec.svg"""
-    Icon = FreeCAD.getUserAppDataDir()+"Mod/ehtecoptics/resources/ehtec.svg"
+    Icon = FreeCAD.getUserAppDataDir()+"Mod/ehtecoptics/resources/lens.svg"
 
     def Initialize(self):
         "This function is executed when FreeCAD starts"

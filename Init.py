@@ -27,4 +27,5 @@
 
 #FreeCAD.addImportType("My own format (*.own)","importOwn")
 #FreeCAD.addExportType("My own format (*.own)","importOwn")
-print "I am executing some stuff here when FreeCAD starts!"
+print "You have included the Elias Hohl Technologies (ehtec) Optics Extension."
+print "For more details, check https://www.ehtec.co and https://github.com/ehtec."
