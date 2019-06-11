@@ -3,7 +3,7 @@ import FreeCADGui
 import laser
 import FreeCAD as App
 
-class Single_Ray_Laser_Class():
+class Rectangular_Laser_Class():
     """My new command"""
 
     def GetResources(self):
@@ -11,13 +11,13 @@ class Single_Ray_Laser_Class():
 	#iconpath ='/home/pi/.FreeCAD/Mod/ehtecoptics/resources/ehtec.svg'
 	#print iconpath
         return {'Pixmap'  : iconpath, # the name of a svg file available in the resources
-                'Accel' : "Shift+S", # a default shortcut (optional)
-                'MenuText': "Single Ray Laser",
-                'ToolTip' : "Creates a single ray laser"}
+                'Accel' : "Shift+R", # a default shortcut (optional)
+                'MenuText': "Rectangular Laser",
+                'ToolTip' : "Creates a rectangular laser"}
 
     def Activated(self):
         "Do something here"
-	laser.makeSingleRayLaser()
+	laser.makeRectangularLaser()
 	return
 
     def IsActive(self):
@@ -25,4 +25,4 @@ class Single_Ray_Laser_Class():
         are met or not. This function is optional."""
         return True
 
-FreeCADGui.addCommand('Single_Ray_Laser',Single_Ray_Laser_Class())
+FreeCADGui.addCommand('Rectangular_Laser',Rectangular_Laser_Class())

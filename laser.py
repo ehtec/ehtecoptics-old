@@ -32,12 +32,13 @@ class RectangularLaser:
 		obj.addProperty("App::PropertyFloat", "Power", "Lens Workbench").Power = 1.0 #milliwatt
 		obj.addProperty("App::PropertyBool", "Activated", "Lens Workbench").Activated = True
 		obj.addProperty("App::PropertyFloat", "Width", "Lens Workbench").Width = 10 #mm
-		obj.addProperty("App::PropertyFloat", "Height", "Lens Workbench").Activated = 10 #mm
+		obj.addProperty("App::PropertyFloat", "Height", "Lens Workbench").Height = 10 #mm
+		obj.addProperty("App::PropertyFloat", "Length", "Lens Workbench").Length = 30 #mm
 		obj.addProperty("App::PropertyFloat", "Density", "Lens Workbench").Density = 1 #rays/mm
-		obj.setEditorMode("Width",1)
-		obj.setEditorMode("Height",1)
+		#obj.setEditorMode("Width",1)
+		#obj.setEditorMode("Height",1)
 		obj.Proxy = self
-		obj.Shape = Part.makeBox(10.0,10.0,30.0)
+		obj.Shape = Part.makeBox(obj.Height, obj.Width, obj.Length)
 
 	def execute(self, fp):
 		'''"Print a short message when doing a recomputation, this method is mandatory" '''
@@ -45,6 +46,7 @@ class RectangularLaser:
 		lcol=tuple([x/255.0 for x in wres])
 		col=[(0.8,0.8,0.8),(0.8,0.8,0.8),(0.8,0.8,0.8),(0.8,0.8,0.8),(0.8,0.8,0.8),lcol]
 		fp.ViewObject.DiffuseColor=col
+		fp.Shape = Part.makeBox(fp.Height, fp.Width, fp.Length)
 
 def makeSingleRayLaser():
 	a=FreeCAD.ActiveDocument.addObject("Part::FeaturePython","SingleRayLaser")

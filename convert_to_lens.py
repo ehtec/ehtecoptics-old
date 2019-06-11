@@ -11,7 +11,7 @@ class Convert_To_Lens_Class():
 	#iconpath ='/home/pi/.FreeCAD/Mod/ehtecoptics/resources/ehtec.svg'
 	#print iconpath
         return {'Pixmap'  : iconpath, # the name of a svg file available in the resources
-                'Accel' : "Shift+C", # a default shortcut (optional)
+                'Accel' : "Shift+L", # a default shortcut (optional)
                 'MenuText': "Convert To Lens",
                 'ToolTip' : "Converts a solid to a lens"}
 

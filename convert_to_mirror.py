@@ -1,9 +1,9 @@
 import FreeCAD
 import FreeCADGui
-import laser
+import mirror
 import FreeCAD as App
 
-class Single_Ray_Laser_Class():
+class Convert_To_Mirror_Class():
     """My new command"""
 
     def GetResources(self):
@@ -11,18 +11,24 @@ class Single_Ray_Laser_Class():
 	#iconpath ='/home/pi/.FreeCAD/Mod/ehtecoptics/resources/ehtec.svg'
 	#print iconpath
         return {'Pixmap'  : iconpath, # the name of a svg file available in the resources
-                'Accel' : "Shift+S", # a default shortcut (optional)
-                'MenuText': "Single Ray Laser",
-                'ToolTip' : "Creates a single ray laser"}
+                'Accel' : "Shift+A", # a default shortcut (optional)
+                'MenuText': "Convert To Absorber",
+                'ToolTip' : "Converts a solid to a mirror"}
 
     def Activated(self):
         "Do something here"
-	laser.makeSingleRayLaser()
-	return
+	theobj = App.ActiveDocument.ActiveObject
+	amirror = mirror.makeMirror()
+	theshape = theobj.Shape
+	amirror.Shape = theshape
+	theobj.ViewObject.Visibility = False
+	amirror.ViewObject.ShapeColor=(131.0/255,137.0/255,150.0/255)
+        return
 
     def IsActive(self):
         """Here you can define if the command must be active or not (greyed) if certain conditions
         are met or not. This function is optional."""
         return True
 
-FreeCADGui.addCommand('Single_Ray_Laser',Single_Ray_Laser_Class())
+FreeCADGui.addCommand('Convert_To_Mirror',Convert_To_Mirror_Class())
+

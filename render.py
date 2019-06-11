@@ -53,6 +53,17 @@ def render():
 	objs = App.ActiveDocument.Objects
 	objnames = [aobj.Name for aobj in objs]
 	lenses = [alensname for alensname in objnames if "Lens" in alensname]
+	#remove all lenses which are not Activated
+	lenses = [alensname for alensname in lenses if App.ActiveDocument.getObject(alensname).Activated ]
+	#get all absorbers
+	absorbers = [aabsorbername for aabsorbername in objnames if "Absorber" in aabsorbername]
+	#remove all absorbers which are not activated
+	absorbers = [aabsorbername for aabsorbername in absorbers if App.ActiveDocument.getObject(aabsorbername).Activated]
+	#get all mirrors
+	mirrors = [amirrorname for amirrorname in objnames if "Mirror" in amirrorname]
+	#remove all mirrors which are nkt Activated
+	mirrors = [amirrorname for amirrorname in mirrors if App.ActiveDocument.getObject(amirrorname).Activated]
+	#get the rays
 	lines = [alinename for alinename in objnames if "Line" in alinename]
 	#remove all lines
 	for alinename in lines:
@@ -175,6 +186,28 @@ def render():
                                                 print "intersection point : ", v.Point
                                                 nv = np.array([v.Point.x,v.Point.y,v.Point.z])
                                                 intersection_points.append((nv,alens))
+                        for aabsorber in absorbers:
+                                lobj = App.ActiveDocument.getObject(aabsorber)
+                                s1 = lobj.Shape
+                                s2 = line.Shape
+                                cs = s1.common(s2)
+                                #intersection_points = []
+                                if cs.Vertexes:
+                                        for v in cs.Vertexes:
+                                                print "intersection point : ", v.Point
+                                                nv = np.array([v.Point.x,v.Point.y,v.Point.z])
+                                                intersection_points.append((nv,aabsorber))
+                        for amirror in mirrors:
+                                lobj = App.ActiveDocument.getObject(amirror)
+                                s1 = lobj.Shape
+                                s2 = line.Shape
+                                cs = s1.common(s2)
+                                #intersection_points = []
+                                if cs.Vertexes:
+                                        for v in cs.Vertexes:
+                                                print "intersection point : ", v.Point
+                                                nv = np.array([v.Point.x,v.Point.y,v.Point.z])
+                                                intersection_points.append((nv,amirror))
                         if intersection_points:
                                 mindist = -1.0
                                 minpoint = None
@@ -192,6 +225,9 @@ def render():
                                 App.ActiveDocument.removeObject(line.Name)
                                 line = Draft.makeLine(A_v,FreeCAD.Vector(minpoint[0],minpoint[1],minpoint[2]))
                                 line.ViewObject.LineColor = lcol
+                                #end beam calculation if object is absorber type
+                                if minlens in absorbers:
+                                        break
                                 remaining_distance = remaining_distance - mindist
                                 #normal vector
                                 o = App.ActiveDocument.getObject(minlens)
@@ -225,40 +261,44 @@ def render():
                                 else:
                                         outside = True
                                 print alpha
-                                lastn = n
-                                #n = o.Refractive_index not always working
-                                #compute refractive index of next body
-                                #in case there is only one intersection lens for this point and the ray is going outside set it to SURROUNDING_N
-                                j = 0
-                                for elem in intersection_points:
-                                        if not (elem[0] - minpoint).any():
-                                                j = j +1 
-                                if j == 1:
-                                        if outside:
-                                                n = SURROUNDING_N
+                                #leave all the n stuff untouched if it is not a lens
+                                if minlens in lenses:
+                                        lastn = n
+                                        #n = o.Refractive_index not always working
+                                        #compute refractive index of next body
+                                        #in case there is only one intersection lens for this point and the ray is going outside set it to SURROUNDING_N
+                                        j = 0
+                                        for elem in intersection_points:
+                                                if not (elem[0] - minpoint).any():
+                                                        j = j +1 
+                                        if j == 1:
+                                                if outside:
+                                                        n = SURROUNDING_N
+                                                else:
+                                                        n = o.Refractive_index
+                                        #now check for other lenses#
                                         else:
-                                                n = o.Refractive_index
-                                #now check for other lenses#
-                                else:
-                                        if outside:
-                                                for elem in intersection_points:
-                                                        if elem[1]==o.Name:
-                                                                continue
-                                                        if not (elem[0] - minpoint).any():
-                                                                n = App.ActiveDocument.getObject(elem[1]).Refractive_index
-                                                                break
-                                        else:
-                                                n = o.Refractive_index
-                                #for refraction / total reflection
-                                print "n=:"
-                                print n
-                                print "lastn=:"
-                                print lastn
-                                chi = lastn * np.sin(alpha) / n
-                                if chi >= 1: #total reflection
+                                                if outside:
+                                                        for elem in intersection_points:
+                                                                if elem[1]==o.Name:
+                                                                        continue
+                                                                if not (elem[0] - minpoint).any():
+                                                                        n = App.ActiveDocument.getObject(elem[1]).Refractive_index
+                                                                        break
+                                                else:
+                                                        n = o.Refractive_index
+                                        #for refraction / total reflection
+                                        print "n=:"
+                                        print n
+                                        print "lastn=:"
+                                        print lastn
+                                        chi = lastn * np.sin(alpha) / n
+                                        if chi >= 1: #total reflection
+                                                beta = np.pi - alpha
+                                        else: #refraction
+                                                beta = np.arcsin(chi)
+                                if minlens in mirrors:
                                         beta = np.pi - alpha
-                                else: #refraction
-                                        beta = np.arcsin(chi)
                                 print beta
                                 if outside:
                                         normal_rot = normalize(np.cross(next_ray,np_vn))
