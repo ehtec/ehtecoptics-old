@@ -63,6 +63,12 @@ def render():
 	mirrors = [amirrorname for amirrorname in objnames if "Mirror" in amirrorname]
 	#remove all mirrors which are nkt Activated
 	mirrors = [amirrorname for amirrorname in mirrors if App.ActiveDocument.getObject(amirrorname).Activated]
+	#remove the ray folder if existent
+	grp = None
+	if App.ActiveDocument.getObject("Rays") is not None:
+                App.ActiveDocument.removeObject("Rays")
+        #create new Ray folder
+        grp = App.ActiveDocument.addObject("App::DocumentObjectGroup","Rays")
 	#get the rays
 	lines = [alinename for alinename in objnames if "Line" in alinename]
 	#remove all lines
@@ -81,21 +87,23 @@ def render():
 		if "SingleRayLaser" in obj.Name:
                         #type is SingleRayLaser
                         A = np.array([obj.Placement.Base.x,obj.Placement.Base.y,obj.Placement.Base.z])
-                        rot = obj.Placement.Rotation.toEuler()
-                        crx = rot[2] #roll
-                        cry = rot[1] #pitch
-                        crz = rot[0] #yaw
-                        crx = crx * np.pi / 180.0
-                        cry = cry * np.pi / 180.0
-                        crz = crz * np.pi / 180.0
-                        x = np.sin(crz)
-                        y = -(np.sin(crx) * np.cos(crz))
-                        z = np.cos(crx) * np.cos(cry)
+                        #rot = obj.Placement.Rotation.toEuler()
+                        #crx = rot[2] #roll
+                        #cry = rot[1] #pitch
+                        #crz = rot[0] #yaw
+                        #crx = crx * np.pi / 180.0
+                        #cry = cry * np.pi / 180.0
+                        #crz = crz * np.pi / 180.0
+                        #x = np.sin(cry)
+                        #y = -(np.sin(crx) * np.cos(crz))
+                        #z = np.cos(crx) * np.cos(cry)
                         #view = FreeCAD.Vector(x,y,z)
                         #print x
                         #print y
                         #print z
-                        AB = np.array([x,y,z])
+                        #AB = np.array([x,y,z])
+                        #changed euler angles to use of normalAt
+                        AB = np.array([obj.Shape.Faces[1].normalAt(0,0).x,obj.Shape.Faces[1].normalAt(0,0).y,obj.Shape.Faces[1].normalAt(0,0).z])
                         B = A + MAXRAYLENGTH*AB
                         next_ray = AB
                         #draw the first ray and start loop
@@ -115,21 +123,23 @@ def render():
                         v26 = ver6_np - ver2_np
                         #get the rotation of the object
                         A = np.array([obj.Placement.Base.x,obj.Placement.Base.y,obj.Placement.Base.z])
-                        rot = obj.Placement.Rotation.toEuler()
-                        crx = rot[2] #roll
-                        cry = rot[1] #pitch
-                        crz = rot[0] #yaw
-                        crx = crx * np.pi / 180.0
-                        cry = cry * np.pi / 180.0
-                        crz = crz * np.pi / 180.0
-                        x = np.sin(crz)
-                        y = -(np.sin(crx) * np.cos(crz))
-                        z = np.cos(crx) * np.cos(cry)
+                        #rot = obj.Placement.Rotation.toEuler()
+                        #crx = rot[2] #roll
+                        #cry = rot[1] #pitch
+                        #crz = rot[0] #yaw
+                        #crx = crx * np.pi / 180.0
+                        #cry = cry * np.pi / 180.0
+                        #crz = crz * np.pi / 180.0
+                        #x = np.sin(crz)
+                        #y = -(np.sin(crx) * np.cos(crz))
+                        #z = np.cos(crx) * np.cos(cry)
                         #view = FreeCAD.Vector(x,y,z)
                         #print x
                         #print y
                         #print z
-                        AB = np.array([x,y,z])
+                        #AB = np.array([x,y,z])
+                        #changed to normalAt instead of euler angles
+                        AB = np.array([obj.Shape.Faces[5].normalAt(0,0).x,obj.Shape.Faces[5].normalAt(0,0).y,obj.Shape.Faces[5].normalAt(0,0).z])
                         next_ray = AB
                         #get coordinates of A points
                         A_list = []
@@ -169,6 +179,9 @@ def render():
                         #A_v = FreeCAD.Vector(A[0],A[1],A[2])
                         #B_v = FreeCAD.Vector(B[0],B[1],B[2])
                         line = Draft.makeLine(A_v,B_v)
+                        #add the line to the Rays folder
+                        grp.addObject(line)
+                        #input('press enter')
                         #set the color
                         wres=wavelen2rgb.wavelen2rgb(obj.Wavelength)
                         lcol=tuple([x/255.0 for x in wres])
@@ -224,6 +237,7 @@ def render():
                                         break
                                 App.ActiveDocument.removeObject(line.Name)
                                 line = Draft.makeLine(A_v,FreeCAD.Vector(minpoint[0],minpoint[1],minpoint[2]))
+                                grp.addObject(line)
                                 line.ViewObject.LineColor = lcol
                                 #end beam calculation if object is absorber type
                                 if minlens in absorbers:
@@ -252,6 +266,7 @@ def render():
                                 v1_v = FreeCAD.Vector(v1[0],v1[1],v1[2])
                                 v2_v = FreeCAD.Vector(v2[0],v2[1],v2[2])
                                 lot = Draft.makeLine(v1_v,v2_v)
+                                grp.addObject(lot)
                                 #print angle
                                 alpha = angle_between(np_vn,next_ray)
                                 #make alpha opposite in case it is greater than 90 degrees
