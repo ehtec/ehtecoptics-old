@@ -22,3 +22,11 @@ def rotate_vector(v,erot,angle): #vector,axis,angle in radians
 	eo=np.cross(erot,ep)
 	vrot=(np.cos(angle)*ep+np.sin(angle)*eo)*plnorm+norme*erot
 	return vrot
+
+def perpendicular_vector(v):
+        if v[1]==0 and v[2]==0:
+                if v[0]==0:
+                        raise ValueError('zero vector')
+                else:
+                        return np.cross(v,[0,1,0])
+        return np.cross(v,[1,0,0])

@@ -7,6 +7,7 @@ from vect_ops import *
 import numpy as np
 #from math import sin, cos, pi
 import Draft
+import spreadpoints
 
 MAXRAYLENGTH = 1000 #mm
 
@@ -158,6 +159,23 @@ def render():
                                 B_v = FreeCAD.Vector(B[0],B[1],B[2])
                                 beams.append((A,B,A_v,B_v,next_ray,obj))
                                 #print 'yesyes'
+                elif "CircularLaser" in obj.Name:
+                        A = np.array([obj.Placement.Base.x, obj.Placement.Base.y, obj.Placement.Base.z])
+                        AB = np.array([obj.Shape.Faces[1].normalAt(0,0).x, obj.Shape.Faces[1].normalAt(0,0).y, obj.Shape.Faces[1].normalAt(0,0).z])
+                        next_ray = AB
+                        A_list = []
+                        N = int(round(obj.Density * ((obj.Radius)**2) * np.pi))
+                        thecoordinates = spreadpoints.get_coordinates(N,obj.Radius)
+                        v1 = normalize(perpendicular_vector(AB))
+                        v2 = normalize(np.cross(AB,v1))
+                        for elem in thecoordinates:
+                                A_list.append(v1 * elem[0] + v2 * elem[1] + A)
+                        for elem in A_list:
+                                A = elem
+                                B = elem + AB*MAXRAYLENGTH
+                                A_v = FreeCAD.Vector(A[0],A[1],A[2])
+                                B_v = FreeCAD.Vector(B[0],B[1],B[2])
+                                beams.append((A,B,A_v,B_v,next_ray,obj))
         #print beams
         for beam in beams:
                 A = beam[0]
@@ -168,6 +186,7 @@ def render():
                 obj = beam[5]
                 remaining_distance = MAXRAYLENGTH
                 #j = 0
+                totref = False
                 while True:
                         outside = False
                         #j = j+1
@@ -278,7 +297,8 @@ def render():
                                 print alpha
                                 #leave all the n stuff untouched if it is not a lens
                                 if minlens in lenses:
-                                        lastn = n
+                                        if totref == False:
+                                                lastn = n
                                         #n = o.Refractive_index not always working
                                         #compute refractive index of next body
                                         #in case there is only one intersection lens for this point and the ray is going outside set it to SURROUNDING_N
@@ -309,8 +329,12 @@ def render():
                                         print lastn
                                         chi = lastn * np.sin(alpha) / n
                                         if chi >= 1: #total reflection
+                                                print "totalreflection"
+                                                totref = True
                                                 beta = np.pi - alpha
                                         else: #refraction
+                                                print "refraction"
+                                                totref = False
                                                 beta = np.arcsin(chi)
                                 if minlens in mirrors:
                                         beta = np.pi - alpha

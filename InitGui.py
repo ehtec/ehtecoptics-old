@@ -9,8 +9,8 @@ class ehtecOptics (Workbench):
 
     def Initialize(self):
         "This function is executed when FreeCAD starts"
-        import convert_to_lens, convert_to_absorber, convert_to_mirror, single_ray_laser, rectangular_laser, render_command # import here all the needed files that create your FreeCAD commands
-        self.list = ["Convert_To_Lens", "Convert_To_Absorber", "Convert_To_Mirror", "Single_Ray_Laser", "Rectangular_Laser", "Render"] # A list of command names created in the line above
+        import convert_to_lens, convert_to_absorber, convert_to_mirror, single_ray_laser, rectangular_laser, circular_laser, render_command # import here all the needed files that create your FreeCAD commands
+        self.list = ["Convert_To_Lens", "Convert_To_Absorber", "Convert_To_Mirror", "Single_Ray_Laser", "Rectangular_Laser","Circular_Laser", "Render"] # A list of command names created in the line above
         self.appendToolbar("My Commands",self.list) # creates a new toolbar with your commands
         self.appendMenu("My New Menu",self.list) # creates a new menu
         self.appendMenu(["An existing Menu","My submenu"],self.list) # appends a submenu to an existing menu
